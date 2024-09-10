@@ -24,14 +24,22 @@ func main() {
 
 	// Service initialization
 	userService := user.NewUserService(config.DB)
+	authService := auth.NewAuthService(userService)
 
 	// Controller initialization
-	authController := auth.NewAuthController(userService)
+	authController := auth.NewAuthController(authService)
 
 	// Authentication routes
 	authRoutes := r.Group("/auth")
 	{
 		authRoutes.POST("/register", authController.RegisterUser)
+		authRoutes.POST("/login", authController.LoginUser)
+	}
+
+	protectedRoutes := r
+	protectedRoutes.Use(middleware.JWTAuthMiddleware(authService)) // Apply JWT middleware to the /api group
+	{
+		protectedRoutes.GET("/me", authController.Me) // Add the /me route
 	}
 
 	// Start the server on port 8080

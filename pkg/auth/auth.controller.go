@@ -2,20 +2,20 @@ package auth
 
 import (
 	"api-auth/pkg/auth/dto"
-	"api-auth/pkg/user"
 	"api-auth/pkg/user/models"
 	"api-auth/utils"
+	"api-auth/utils/helpers"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 type AuthController struct {
-	userService user.UserService
+	authService AuthService
 }
 
-func NewAuthController(userService user.UserService) AuthController {
-	return AuthController{userService: userService}
+func NewAuthController(authService AuthService) AuthController {
+	return AuthController{authService: authService}
 }
 
 func (ac *AuthController) RegisterUser(c *gin.Context) {
@@ -29,7 +29,7 @@ func (ac *AuthController) RegisterUser(c *gin.Context) {
 		Password: userDTO.Password, // Password hashing should be handled inside the service layer
 	}
 
-	err := ac.userService.Create(&user)
+	err := ac.authService.RegisterUser(&user)
 	if err != nil {
 		c.Error(err) // Add error to Gin Context
 		return
@@ -38,4 +38,26 @@ func (ac *AuthController) RegisterUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": "User registered successfully"})
 }
 
-// how to prevent the server to run if there is any error and show that error
+func (ac *AuthController) LoginUser(c *gin.Context) {
+	var loginDTO dto.LoginDTO
+	if !utils.BindJSONAndValidate(c, &loginDTO) {
+		return
+	}
+
+	data, err := ac.authService.LoginUser(loginDTO)
+	if err != nil {
+		c.Error(err) // Add error to Gin Context
+		return
+	}
+
+	c.JSON(http.StatusOK, data)
+}
+
+func (ac *AuthController) Me(c *gin.Context) {
+	user, err := helpers.GetCurrentUser(c)
+	if err != nil {
+		c.Error(err) // Add error to Gin Context
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"user": user})
+}

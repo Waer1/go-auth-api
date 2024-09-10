@@ -1,14 +1,15 @@
 package models
 
 import (
+	"api-auth/utils/models"
+
 	"golang.org/x/crypto/bcrypt"
-	"gorm.io/gorm"
 )
 
 type User struct {
-	gorm.Model
+	models.BaseEntity
 	Email    string `gorm:"uniqueIndex;size:100" json:"email"` // Ensure email is unique and define a reasonable size
-	Password string `json:"password"`
+	Password string `json:"-"`
 }
 
 // HashPassword hashes the user's password using bcrypt.
