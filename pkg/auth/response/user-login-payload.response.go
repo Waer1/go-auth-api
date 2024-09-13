@@ -1,6 +1,6 @@
 package response
 
-import "api-auth/pkg/user/models"
+import "api-auth/utils/models"
 
 type UserLoginPayload struct {
 	User  *models.User

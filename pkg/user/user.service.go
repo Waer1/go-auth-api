@@ -2,8 +2,8 @@ package user
 
 import (
 	"api-auth/pkg/auth/dto"
-	"api-auth/pkg/user/models"
 	"api-auth/utils"
+	"api-auth/utils/models"
 	"net/http"
 
 	"golang.org/x/crypto/bcrypt"

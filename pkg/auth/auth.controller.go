@@ -2,9 +2,9 @@ package auth
 
 import (
 	"api-auth/pkg/auth/dto"
-	"api-auth/pkg/user/models"
 	"api-auth/utils"
 	"api-auth/utils/helpers"
+	"api-auth/utils/models"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

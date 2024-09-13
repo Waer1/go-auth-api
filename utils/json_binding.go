@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -10,6 +11,7 @@ import (
 // It returns true if binding and validation are successful, or false and handles the error response.
 func BindJSONAndValidate(c *gin.Context, obj interface{}) bool {
 	if err := c.ShouldBindJSON(obj); err != nil {
+		fmt.Println("Error binding JSON:", err)
 		errDetails := FormatValidationError(err)
 		c.Error(
 			NewServiceErr(http.StatusBadRequest, errDetails),

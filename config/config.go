@@ -3,6 +3,7 @@ package config
 import (
 	"log"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/asaskevich/govalidator"
@@ -18,6 +19,12 @@ type EnvFile struct {
 	DbName      string        `valid:"required"`
 	JwtSecret   string        `valid:"required,length(32|64)"`
 	JwtExpireIn time.Duration `valid:"required"`
+
+	// redis
+	RedisHost     string `valid:"required"`
+	RedisPort     string `valid:"required,numeric"`
+	RedisPassword string `valid:"required"`
+	RedisDB       int    `valid:"required,numeric"`
 }
 
 var Config EnvFile
@@ -25,6 +32,12 @@ var Config EnvFile
 func LoadConfig() {
 	if err := godotenv.Load(); err != nil {
 		log.Fatalf("Error loading .env file: %v", err)
+	}
+
+	// Convert RedisDB from string to int
+	redisDB, err := strconv.Atoi(getEnv("REDIS_DB"))
+	if err != nil {
+		log.Fatalf("Error converting REDIS_DB to int: %v", err)
 	}
 
 	// Map environment variables to the Config struct
@@ -37,6 +50,11 @@ func LoadConfig() {
 		DbName:      getEnv("DB_NAME"),
 		JwtSecret:   getEnv("JWT_SECRET"),
 		JwtExpireIn: parseDuration("JwtExpireIn"), // Parse the expiration time as a time.Duration
+		// redis
+		RedisHost:     getEnv("REDIS_HOST"),
+		RedisPort:     getEnv("REDIS_PORT"),
+		RedisPassword: getEnv("REDIS_PASSWORD"),
+		RedisDB:       redisDB,
 	}
 
 	// Validate the configuration

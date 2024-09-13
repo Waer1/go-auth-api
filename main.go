@@ -4,6 +4,8 @@ import (
 	"api-auth/config"
 	"api-auth/middleware"
 	"api-auth/pkg/auth"
+	"api-auth/pkg/post"
+	"api-auth/pkg/tag"
 	"api-auth/pkg/user"
 	"fmt"
 
@@ -13,6 +15,7 @@ import (
 func init() {
 	config.LoadConfig()
 	config.ConnectDatabase()
+	config.InitializeRedis()
 }
 
 func main() {
@@ -24,10 +27,14 @@ func main() {
 
 	// Service initialization
 	userService := user.NewUserService(config.DB)
-	authService := auth.NewAuthService(userService)
+	authService := auth.NewAuthService(userService, config.RedisClient)
+	tagService := tag.NewTagService(config.DB)
+	postService := post.NewPostService(config.DB, tagService)
 
 	// Controller initialization
 	authController := auth.NewAuthController(authService)
+	tagController := tag.NewTagController(tagService)
+	postController := post.NewPostController(postService)
 
 	// Authentication routes
 	authRoutes := r.Group("/auth")
@@ -40,6 +47,23 @@ func main() {
 	protectedRoutes.Use(middleware.JWTAuthMiddleware(authService)) // Apply JWT middleware to the /api group
 	{
 		protectedRoutes.GET("/me", authController.Me) // Add the /me route
+
+		// tags
+		tagGroup := protectedRoutes.Group("/tags")
+		tagGroup.POST("", tagController.CreateTag)
+		tagGroup.GET("", tagController.GetAllTags)
+		tagGroup.PATCH("/:id", tagController.UpdateTag)
+		tagGroup.DELETE("/:id", tagController.DeleteTag)
+		tagGroup.GET("/:id", tagController.GetTag)
+
+		// posts
+		postGroup := protectedRoutes.Group("/posts")
+		postGroup.POST("/", postController.CreatePost)
+		postGroup.GET("/", postController.GetAllPosts)
+		postGroup.PATCH("/:id", postController.UpdatePost)
+		postGroup.DELETE("/:id", postController.DeletePost)
+		postGroup.GET("/:id", postController.GetPostById)
+
 	}
 
 	// Start the server on port 8080

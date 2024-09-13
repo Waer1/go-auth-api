@@ -5,10 +5,11 @@ import (
 	"api-auth/pkg/auth/dto"
 	"api-auth/pkg/auth/response"
 	"api-auth/pkg/user"
-	"api-auth/pkg/user/models"
 	"api-auth/utils"
+	"api-auth/utils/models"
 	"api-auth/utils/structs"
 
+	"github.com/go-redis/redis/v8"
 	"github.com/golang-jwt/jwt/v5"
 )
 
@@ -20,11 +21,13 @@ type AuthService interface {
 
 type authService struct {
 	userService user.UserService
+	redisClient *redis.Client
 }
 
-func NewAuthService(userService user.UserService) AuthService {
+func NewAuthService(userService user.UserService, redisClient *redis.Client) AuthService {
 	return &authService{
 		userService: userService,
+		redisClient: redisClient,
 	}
 }
 

@@ -1,7 +1,7 @@
 package config
 
 import (
-	"api-auth/pkg/user/models"
+	"api-auth/utils/models"
 	"fmt"
 	"log"
 
@@ -27,7 +27,7 @@ func ConnectDatabase() {
 	DB = database
 
 	// Automigrate the schema
-	if err := DB.AutoMigrate(&models.User{}); err != nil { // Ensure you migrate all necessary models
+	if err := DB.AutoMigrate(&models.User{}, &models.Post{}, &models.Tag{}); err != nil { // Ensure you migrate all necessary models
 		log.Fatalf("Failed to migrate database: %v", err)
 	}
 	fmt.Println("Database connected and migrated")
